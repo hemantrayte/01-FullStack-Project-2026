@@ -4,7 +4,7 @@ function App() {
 
   return (
     <>
-    <h1>Frontend</h1>
+    <h1>Hemant Rayte | Frontend</h1>
     </>
   )
 }
