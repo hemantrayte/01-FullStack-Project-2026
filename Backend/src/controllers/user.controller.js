@@ -243,7 +243,37 @@ const updateProfile = asyncHandler(async(req, res) => {
 })
 
 const updateAvatar = asyncHandler(async(req, res) => {
-  
+  const userId = req.user?._id
+
+  if(!userId) {
+    throw new ApiError(401, "Unauthorized request");
+  }
+
+  const avatarLocalPath = req.file?.path;
+
+  if(!avatarLocalPath) {
+    throw new ApiError(400, "Avatar file is missing");
+  }
+
+  const avatar = await uploadOnCloudinary(avatarLocalPath)
+
+  if (!avatar.url) {
+    throw new ApiError(400, "Error while uploading avatar");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    userId,
+    {
+      $set: {
+        avatar:avatar.url
+      }
+    },
+    {new: true}
+  ).select("-password -refreshToken")
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Avatar image updated successfully"));
 })
 
 const changePassword = asyncHandler(async(req, res) => {
