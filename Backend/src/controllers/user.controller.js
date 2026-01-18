@@ -206,7 +206,40 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const updateProfile = asyncHandler(async(req, res) => {
-  
+  const {name, email} = req.body;
+
+  if (!req.user?._id) {
+    throw new ApiError(401, "Unauthorized request");
+  }
+
+  if(!name || !email) {
+    throw new ApiError()
+  }
+
+  // 3. Check email uniqueness
+  const emailExists = await User.findOne({
+    email,
+    _id: { $ne: req.user._id },
+  });
+
+  if (emailExists) {
+    throw new ApiError(409, "Email already in use");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set:{
+        name:name,
+        email:email
+      }
+    },
+    {new:true}
+  ).select("-password")
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Account details updated successfully"));
 })
 
 const updateAvatar = asyncHandler(async(req, res) => {
