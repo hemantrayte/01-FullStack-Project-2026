@@ -181,7 +181,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     };
 
     const { accessToken, newrefreshToken } =
-      await generateAccessAndRefresTokens(user._id);
+      await generateAccessAndRefreshTokens(user._id);
 
     return res
       .status(200)
@@ -199,9 +199,11 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-const getCurrentUser = asyncHandler(async(req, res) => {
-  
-})
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .json(new ApiResponse(200, req.user, "User fetched successfully"));
+});
 
 const updateProfile = asyncHandler(async(req, res) => {
   
