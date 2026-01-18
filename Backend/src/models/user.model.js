@@ -22,7 +22,7 @@ const userSchema = new Schema(
       required: true,
     },
 
-    profileImage: {
+    avatar: {
       url: {
         type: String,
         default: "",
