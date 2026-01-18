@@ -294,9 +294,41 @@ const changePassword = asyncHandler(async(req, res) => {
     .json(new ApiResponse(200, {}, "Password changed successfully"));
 })
 
-const getAllUsers = asyncHandler(async(req, res) => {
-  
-})
+const getAllUsers = asyncHandler(async (req, res) => {
+  // 1. Pagination
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  // 2. Search
+  const keyword = req.query.search
+    ? {
+        $or: [
+          { name: { $regex: req.query.search, $options: "i" } },
+          { email: { $regex: req.query.search, $options: "i" } },
+        ],
+      }
+    : {};
+
+  // 3. Fetch users
+  const users = await User.find(keyword)
+    .select("-password -refreshToken")
+    .limit(limit)
+    .skip(skip)
+    .sort({ createdAt: -1 });
+
+  // 4. Total count
+  const totalUsers = await User.countDocuments(keyword);
+
+  return res.status(200).json(
+    new ApiResponse(200, {
+      users,
+      totalUsers,
+      page,
+      pages: Math.ceil(totalUsers / limit),
+    }, "Users fetched successfully")
+  );
+});
 
 const getUserById = asyncHandler(async(req, res) => {
   
