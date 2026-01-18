@@ -358,9 +358,47 @@ const getUserById = asyncHandler(async (req, res) => {
 });
 
 
-const deleteUser = asyncHandler(async(req, res) => {
-  
-})
+const deleteUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  // 1. Validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, "Invalid user ID");
+  }
+
+  // 2. Find user
+  const user = await User.findById(id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // 3. Authorization
+  // User can delete own account OR admin can delete anyone
+  if (
+    req.user.role !== "admin" &&
+    req.user._id.toString() !== id
+  ) {
+    throw new ApiError(403, "You are not allowed to delete this account");
+  }
+
+  // 4. Delete user
+  await user.deleteOne();
+
+  // 5. Clear cookies if self delete
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  };
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .json(
+      new ApiResponse(200, {}, "User deleted successfully")
+    );
+});
 
 export {
   register,
