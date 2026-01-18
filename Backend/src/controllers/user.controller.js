@@ -5,7 +5,7 @@ import { uploadOnCloudinary } from "../utils/cloundinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
-const generateAccessAndRefresTokens = async (userId) => {
+const generateAccessAndRefreshTokens = async (userId) => {
   try {
     const user = await User.findById(userId);
     const accessToken = user.generateAccessToken();
@@ -23,18 +23,18 @@ const generateAccessAndRefresTokens = async (userId) => {
   }
 };
 
-const register = asyncHandler(async(req, res) => {
-  const { name, email, password} = req.body
+const register = asyncHandler(async (req, res) => {
+  const { name, email, password } = req.body
 
-  if(!name || !email || !password) {
+  if (!name || !email || !password) {
     throw new ApiError(400, "All fields are required")
   }
 
   const existedUser = await User.findOne({
-    $or: [{email}]
+    $or: [{ email }]
   });
 
-  if (existedUser){
+  if (existedUser) {
     throw new ApiError(409, "User with email or username alredy exists");
   }
 
@@ -68,8 +68,57 @@ const register = asyncHandler(async(req, res) => {
     .json(new ApiResponse(200, createUser, "User Register Successfully"));
 })
 
-const login = asyncHandler(async(req, res) => {
-  
+const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body
+
+  if (!email || !password) {
+    throw new ApiError(400, "Email and Password is required");
+  }
+
+  const user = await User.findOne({ email })
+
+  if (!user) {
+    throw new ApiError(404, "User does not exist")
+  }
+
+  const isPasswordValid = await user.isPasswordCorrect(password)
+
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid user credentials");
+  }
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id)
+
+  const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+
+
+
+  const accessCookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 15 * 60 * 1000, // 15 minutes
+  };
+
+  const refreshCookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
+  };
+
+
+  res
+    .status(200)
+    .cookie("accessToken", accessToken, accessCookieOptions)
+    .cookie("refreshToken", refreshToken, refreshCookieOptions)
+    .json(
+      new ApiResponse(
+        200,
+        { user: loggedInUser },
+        "User logged in successfully"
+      )
+    );
 })
 
 const logOut = asyncHandler(async(req, res) => {
