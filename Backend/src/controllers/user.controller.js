@@ -121,9 +121,35 @@ const login = asyncHandler(async (req, res) => {
     );
 })
 
-const logOut = asyncHandler(async(req, res) => {
-  
-})
+const logoutUser = asyncHandler(async (req, res) => {
+  if (!req.user?._id) {
+    throw new ApiError(401, "Unauthorized request");
+  }
+
+  // 1. Remove refresh token from DB
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $unset: { refreshToken: 1 },
+    },
+    { new: true }
+  );
+
+  // 2. Cookie options (must match login)
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  };
+
+  // 3. Clear cookies
+  return res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .json(new ApiResponse(200, {}, "User logged out successfully"));
+});
+
 
 const refreshToken = asyncHandler(async(req, res) => {
   
@@ -160,7 +186,7 @@ const deleteUser = asyncHandler(async(req, res) => {
 export {
   register,
   login, 
-  logOut, 
+  logoutUser, 
   refreshToken, 
   getCurrentUser, 
   getAllUsers, 
