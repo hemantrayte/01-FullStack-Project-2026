@@ -40,9 +40,29 @@ const getMyBoards = asyncHandler(async (req, res) => {
   );
 });
 
-const getBoardById = asyncHandler(async(req , res) => {
-  
-})
+const getBoardById = asyncHandler(async (req, res) => {
+  const { boardId } = req.params;
+
+  const board = await Board.findById(boardId)
+    .populate("members.user", "name email avatar")
+    .populate("owner", "name email");
+
+  if (!board) {
+    throw new ApiError(404, "Board not found");
+  }
+
+  const isMember = board.members.some(
+    (member) => member.user._id.toString() === req.user._id.toString()
+  );
+
+  if (!isMember) {
+    throw new ApiError(403, "You do not have access to this board");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, board, "Board fetched successfully")
+  );
+});
 
 const updateBoard = asyncHandler(async(req , res) => {
   
