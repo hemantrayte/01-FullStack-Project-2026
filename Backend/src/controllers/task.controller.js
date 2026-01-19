@@ -76,10 +76,32 @@ const deleteTask = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Task deleted successfully"));
 });
 
+const assignUserToTask = asyncHandler(async (req, res) => {
+  const { taskId } = req.params;
+  const { userId } = req.body;
+
+  const task = await Task.findById(taskId);
+
+  if (!task) {
+    throw new ApiError(404, "Task not found");
+  }
+
+  if (task.assignees.includes(userId)) {
+    throw new ApiError(400, "User already assigned");
+  }
+
+  task.assignees.push(userId);
+  await task.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, task, "User assigned to task"));
+});
 
 
 export {
   createTask,
   getBoardTasks,
   updateTask,
+  assignUserToTask
 }
