@@ -6,7 +6,28 @@ import { Board } from '../models/board.model.js'
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const createBoard = asyncHandler(async(req , res) => {
+  const {name, description, visibility } = req.body;
 
+  if(!name) {
+    throw new ApiError(400, "Board name is required");
+  }
+
+  const board = await Board.create({
+    name,
+    description,
+    visibility:visibility || "private",
+    owner: req.user._id,
+    members:[
+      {
+        user: req.user._id,
+        role: "owner",
+      }
+    ]
+  });
+
+  return res.status(201).json(
+    new ApiResponse(201, board, "Board created successfully")
+  );
 })
 
 const getMyBoards = asyncHandler(async(req , res) => {
