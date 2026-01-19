@@ -62,6 +62,20 @@ const updateTask = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, task, "Task updated successfully"));
 });
 
+const deleteTask = asyncHandler(async (req, res) => {
+  const { taskId } = req.params;
+
+  const task = await Task.findByIdAndDelete(taskId);
+
+  if (!task) {
+    throw new ApiError(404, "Task not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Task deleted successfully"));
+});
+
 
 
 export {
