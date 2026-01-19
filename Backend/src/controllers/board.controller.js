@@ -222,7 +222,43 @@ const removeMember = asyncHandler(async(req , res) => {
 })
 
 const leaveBoard = asyncHandler(async(req , res) => {
-  
+  const { boardId } = req.params;
+  const userId = req.user._id;
+
+  // 1️⃣ Find board
+  const board = await Board.findById(boardId);
+
+  if (!board) {
+    throw new ApiError(404, "Board not found");
+  }
+
+  // 2️⃣ Owner cannot leave board
+  if (board.owner.toString() === userId.toString()) {
+    throw new ApiError(
+      403,
+      "Board owner cannot leave. Transfer ownership or delete board."
+    );
+  }
+
+  // 3️⃣ Check if user is a member
+  const isMember = board.members.some(
+    (member) => member.user.toString() === userId.toString()
+  );
+
+  if (!isMember) {
+    throw new ApiError(400, "You are not a member of this board");
+  }
+
+  // 4️⃣ Remove user from members
+  board.members = board.members.filter(
+    (member) => member.user.toString() !== userId.toString()
+  );
+
+  await board.save();
+
+  return res.status(200).json(
+    new ApiResponse(200, {}, "You have left the board successfully")
+  );
 })
 
 
