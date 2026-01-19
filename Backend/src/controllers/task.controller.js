@@ -32,7 +32,20 @@ const createTask = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, task, "Task created successfully"));
 });
 
+const getBoardTasks = asyncHandler(async (req, res) => {
+  const { boardId } = req.params;
+
+  const tasks = await Task.find({ board: boardId })
+    .populate("assignees", "name email avatar")
+    .populate("createdBy", "name email");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, tasks, "Board tasks fetched"));
+});
+
 
 export {
   createTask,
+  getBoardTasks
 }
