@@ -44,8 +44,28 @@ const getBoardTasks = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, tasks, "Board tasks fetched"));
 });
 
+const updateTask = asyncHandler(async (req, res) => {
+  const { taskId } = req.params;
+
+  const task = await Task.findByIdAndUpdate(
+    taskId,
+    { $set: req.body },
+    { new: true }
+  );
+
+  if (!task) {
+    throw new ApiError(404, "Task not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, task, "Task updated successfully"));
+});
+
+
 
 export {
   createTask,
-  getBoardTasks
+  getBoardTasks,
+  updateTask,
 }
