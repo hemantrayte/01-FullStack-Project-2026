@@ -10,7 +10,33 @@ const taskSchema = new Schema(
 
     description: {
       type: String,
+      trim: true,
     },
+
+    board: {
+      type: Schema.Types.ObjectId,
+      ref: "Board",
+      required: true,
+    },
+
+    column: {
+      type: Schema.Types.ObjectId,
+      ref: "Column",
+      required: true,
+    },
+
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    assignees: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
 
     status: {
       type: String,
@@ -18,15 +44,24 @@ const taskSchema = new Schema(
       default: "todo",
     },
 
-    assignedTo: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
+    priority: {
+      type: String,
+      enum: ["low", "medium", "high"],
+      default: "medium",
     },
 
-    board: {
-      type: Schema.Types.ObjectId,
-      ref: "Board",
-      required: true,
+    dueDate: {
+      type: Date,
+    },
+
+    position: {
+      type: Number,
+      default: 0,
+    },
+
+    isArchived: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

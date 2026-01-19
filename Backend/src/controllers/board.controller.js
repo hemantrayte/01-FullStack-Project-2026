@@ -2,7 +2,6 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { Board } from '../models/board.model.js'
-// import { uploadOnCloudinary } from "../utils/cloundinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const createBoard = asyncHandler(async (req, res) => {
@@ -260,7 +259,6 @@ const leaveBoard = asyncHandler(async(req , res) => {
     new ApiResponse(200, {}, "You have left the board successfully")
   );
 })
-
 
 export {
   createBoard, 
