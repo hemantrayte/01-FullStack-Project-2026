@@ -64,9 +64,34 @@ const getBoardById = asyncHandler(async (req, res) => {
   );
 });
 
-const updateBoard = asyncHandler(async(req , res) => {
-  
-})
+const updateBoard = asyncHandler(async (req, res) => {
+  const { boardId } = req.params;
+  const { name, description, visibility } = req.body;
+
+  const board = await Board.findById(boardId);
+
+  if (!board) {
+    throw new ApiError(404, "Board not found");
+  }
+
+  const member = board.members.find(
+    (m) => m.user.toString() === req.user._id.toString()
+  );
+
+  if (!member || member.role === "member") {
+    throw new ApiError(403, "Only admin or owner can update board");
+  }
+
+  board.name = name || board.name;
+  board.description = description || board.description;
+  board.visibility = visibility || board.visibility;
+
+  await board.save();
+
+  return res.status(200).json(
+    new ApiResponse(200, board, "Board updated successfully")
+  );
+});
 
 const deleteBoard = asyncHandler(async(req , res) => {
   
