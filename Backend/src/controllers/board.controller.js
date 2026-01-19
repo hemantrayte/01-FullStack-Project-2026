@@ -5,19 +5,19 @@ import { Board } from '../models/board.model.js'
 // import { uploadOnCloudinary } from "../utils/cloundinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
-const createBoard = asyncHandler(async(req , res) => {
-  const {name, description, visibility } = req.body;
+const createBoard = asyncHandler(async (req, res) => {
+  const { name, description, visibility } = req.body;
 
-  if(!name) {
+  if (!name) {
     throw new ApiError(400, "Board name is required");
   }
 
   const board = await Board.create({
     name,
     description,
-    visibility:visibility || "private",
+    visibility: visibility || "private",
     owner: req.user._id,
-    members:[
+    members: [
       {
         user: req.user._id,
         role: "owner",
@@ -30,9 +30,15 @@ const createBoard = asyncHandler(async(req , res) => {
   );
 })
 
-const getMyBoards = asyncHandler(async(req , res) => {
-  
-})
+const getMyBoards = asyncHandler(async (req, res) => {
+  const boards = await Board.find({
+    "members.user": req.user._id,
+  }).populate("owner", "name email avatar");
+
+  return res.status(200).json(
+    new ApiResponse(200, boards, "Boards fetched successfully")
+  );
+});
 
 const getBoardById = asyncHandler(async(req , res) => {
   
