@@ -171,7 +171,54 @@ const addMember = asyncHandler(async(req , res) => {
 })
 
 const removeMember = asyncHandler(async(req , res) => {
-  
+  const { boardId, userId } = req.params;
+
+  // 1️⃣ Find board
+  const board = await Board.findById(boardId);
+
+  if (!board) {
+    throw new ApiError(404, "Board not found");
+  }
+
+  // 2️⃣ Check if target user is owner
+  if (board.owner.toString() === userId) {
+    throw new ApiError(403, "Board owner cannot be removed");
+  }
+
+  // 3️⃣ Permission check
+  const isOwner = board.owner.toString() === req.user._id.toString();
+
+  const isAdmin = board.members.some(
+    (member) =>
+      member.user.toString() === req.user._id.toString() &&
+      member.role === "admin"
+  );
+
+  const isSelf = req.user._id.toString() === userId;
+
+  if (!isOwner && !isAdmin && !isSelf) {
+    throw new ApiError(403, "You are not allowed to remove this member");
+  }
+
+  // 4️⃣ Check if user is member
+  const isMember = board.members.some(
+    (member) => member.user.toString() === userId
+  );
+
+  if (!isMember) {
+    throw new ApiError(404, "User is not a board member");
+  }
+
+  // 5️⃣ Remove member
+  board.members = board.members.filter(
+    (member) => member.user.toString() !== userId
+  );
+
+  await board.save();
+
+  return res.status(200).json(
+    new ApiResponse(200, board, "Member removed from board successfully")
+  );
 })
 
 const leaveBoard = asyncHandler(async(req , res) => {
