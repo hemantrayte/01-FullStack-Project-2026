@@ -8,10 +8,36 @@ const boardSchema = new Schema(
       trim: true,
     },
 
-    workspace: {
+    description: {
+      type: String,
+      trim: true,
+    },
+
+    owner: {
       type: Schema.Types.ObjectId,
-      ref: "Workspace",
+      ref: "User",
       required: true,
+    },
+
+    members: [
+      {
+        user: {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        role: {
+          type: String,
+          enum: ["owner", "admin", "member"],
+          default: "member",
+        },
+      },
+    ],
+
+    visibility: {
+      type: String,
+      enum: ["private", "public"],
+      default: "private",
     },
   },
   { timestamps: true }
