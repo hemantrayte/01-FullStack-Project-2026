@@ -93,9 +93,25 @@ const updateBoard = asyncHandler(async (req, res) => {
   );
 });
 
-const deleteBoard = asyncHandler(async(req , res) => {
-  
-})
+const deleteBoard = asyncHandler(async (req, res) => {
+  const { boardId } = req.params;
+
+  const board = await Board.findById(boardId);
+
+  if (!board) {
+    throw new ApiError(404, "Board not found");
+  }
+
+  if (board.owner.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "Only owner can delete the board");
+  }
+
+  await board.deleteOne();
+
+  return res.status(200).json(
+    new ApiResponse(200, {}, "Board deleted successfully")
+  );
+});
 
 const addMember = asyncHandler(async(req , res) => {
   
