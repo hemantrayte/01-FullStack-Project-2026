@@ -114,7 +114,60 @@ const deleteBoard = asyncHandler(async (req, res) => {
 });
 
 const addMember = asyncHandler(async(req , res) => {
-  
+  const { boardId } = req.params;
+  const { userId, role = "member" } = req.body;
+
+  if (!userId) {
+    throw new ApiError(400, "User ID is required");
+  }
+
+  // 1️⃣ Find board
+  const board = await Board.findById(boardId);
+
+  if (!board) {
+    throw new ApiError(404, "Board not found");
+  }
+
+  // 2️⃣ Permission check
+  const isOwner = board.owner.toString() === req.user._id.toString();
+
+  const isAdmin = board.members.some(
+    (member) =>
+      member.user.toString() === req.user._id.toString() &&
+      member.role === "admin"
+  );
+
+  if (!isOwner && !isAdmin) {
+    throw new ApiError(403, "You are not allowed to add members");
+  }
+
+  // 3️⃣ Check if user exists
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User does not exist");
+  }
+
+  // 4️⃣ Prevent duplicate members
+  const alreadyMember = board.members.some(
+    (member) => member.user.toString() === userId
+  );
+
+  if (alreadyMember) {
+    throw new ApiError(409, "User already a board member");
+  }
+
+  // 5️⃣ Add member
+  board.members.push({
+    user: userId,
+    role,
+  });
+
+  await board.save();
+
+  return res.status(200).json(
+    new ApiResponse(200, board, "Member added to board successfully")
+  );
 })
 
 const removeMember = asyncHandler(async(req , res) => {
