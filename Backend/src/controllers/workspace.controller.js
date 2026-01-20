@@ -40,7 +40,23 @@ const getMyWorkspaces = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, workspaces, "Workspaces fetched"));
 });
 
+const getWorkspaceById = asyncHandler(async (req, res) => {
+  const { workspaceId } = req.params;
+
+  const workspace = await Workspace.findById(workspaceId)
+    .populate("members.user", "name email avatar");
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, workspace, "Workspace fetched"));
+});
+
 export {
   createWorkspace,
   getMyWorkspaces,
+  getWorkspaceById
 }
