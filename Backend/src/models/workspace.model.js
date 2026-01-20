@@ -24,14 +24,26 @@ const workspaceSchema = new Schema(
         user: {
           type: Schema.Types.ObjectId,
           ref: "User",
+          required: true,
         },
         role: {
           type: String,
-          enum: ["admin", "member"],
+          enum: ["owner", "admin", "member"],
           default: "member",
         },
       },
     ],
+
+    visibility: {
+      type: String,
+      enum: ["private", "public"],
+      default: "private",
+    },
+
+    isArchived: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
