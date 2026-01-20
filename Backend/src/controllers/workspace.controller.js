@@ -26,3 +26,21 @@ const createWorkspace = async(async(req , res) =>{
     .status(201)
     .json(new ApiResponse(201, workspace, "Workspace created successfully"))
 })
+
+const getMyWorkspaces = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const workspaces = await Workspace.find({
+    "members.user": userId,
+    isArchived: false,
+  });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, workspaces, "Workspaces fetched"));
+});
+
+export {
+  createWorkspace,
+  getMyWorkspaces,
+}
