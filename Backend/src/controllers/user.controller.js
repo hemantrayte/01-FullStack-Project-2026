@@ -330,7 +330,6 @@ const getAllUsers = asyncHandler(async (req, res) => {
   );
 });
 
-import mongoose from "mongoose";
 
 const getUserById = asyncHandler(async (req, res) => {
   const { id } = req.params;

@@ -103,5 +103,6 @@ export {
   createTask,
   getBoardTasks,
   updateTask,
-  assignUserToTask
+  assignUserToTask,
+  deleteTask,
 }
