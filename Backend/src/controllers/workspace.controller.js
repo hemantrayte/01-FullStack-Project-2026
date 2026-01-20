@@ -79,9 +79,31 @@ const updateWorkspace = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, workspace, "Workspace updated successfully"));
 });
 
+const archiveWorkspace = asyncHandler(async (req, res) => {
+  const { workspaceId } = req.params;
+
+  const workspace = await Workspace.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found");
+  }
+
+  if (workspace.owner.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "Only owner can archive workspace");
+  }
+
+  workspace.isArchived = true;
+  await workspace.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Workspace archived successfully"));
+});
+
 export {
   createWorkspace,
   getMyWorkspaces,
   getWorkspaceById,
-  updateWorkspace
+  updateWorkspace,
+  archiveWorkspace,
 }
