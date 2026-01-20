@@ -55,8 +55,33 @@ const getWorkspaceById = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, workspace, "Workspace fetched"));
 });
 
+const updateWorkspace = asyncHandler(async (req, res) => {
+  const { workspaceId } = req.params;
+  const { name, description } = req.body;
+
+  const workspace = await Workspace.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found");
+  }
+
+  if (workspace.owner.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "Only owner can update workspace");
+  }
+
+  workspace.name = name || workspace.name;
+  workspace.description = description || workspace.description;
+
+  await workspace.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, workspace, "Workspace updated successfully"));
+});
+
 export {
   createWorkspace,
   getMyWorkspaces,
-  getWorkspaceById
+  getWorkspaceById,
+  updateWorkspace
 }
