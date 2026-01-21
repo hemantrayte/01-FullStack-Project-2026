@@ -89,7 +89,17 @@ const getUserLogs = asyncHandler(async(req , res) => {
 })
 
 const deleteActivityLog = asyncHandler(async(req , res) => {
-  
+  const { logId } = req.params;
+
+  const log = await ActivityLog.findByIdAndDelete(logId);
+
+  if (!log) {
+    throw new ApiError(404, "Activity log not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Activity log deleted"));
 })
 
 const clearEntityLogs = asyncHandler(async(req , res) => {
