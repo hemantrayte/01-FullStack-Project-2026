@@ -100,10 +100,98 @@ const archiveWorkspace = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Workspace archived successfully"));
 });
 
+const addWorkspaceMember = asyncHandler(async (req, res) => {
+  const { workspaceId } = req.params;
+  const { userId, role = "member" } = req.body;
+
+  const workspace = await Workspace.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found");
+  }
+
+  if (workspace.owner.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "Only owner can add members");
+  }
+
+  const exists = workspace.members.some(
+    (m) => m.user.toString() === userId
+  );
+
+  if (exists) {
+    throw new ApiError(400, "User already a member");
+  }
+
+  workspace.members.push({ user: userId, role });
+  await workspace.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, workspace, "Member added"));
+});
+
+const removeWorkspaceMember = asyncHandler(async (req, res) => {
+  const { workspaceId, userId } = req.params;
+
+  const workspace = await Workspace.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found");
+  }
+
+  if (workspace.owner.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "Only owner can remove members");
+  }
+
+  if (workspace.owner.toString() === userId) {
+    throw new ApiError(400, "Owner cannot be removed");
+  }
+
+  workspace.members = workspace.members.filter(
+    (m) => m.user.toString() !== userId
+  );
+
+  await workspace.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, workspace, "Member removed"));
+});
+
+const leaveWorkspace = asyncHandler(async (req, res) => {
+  const { workspaceId } = req.params;
+
+  const workspace = await Workspace.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found");
+  }
+
+  if (workspace.owner.toString() === req.user._id.toString()) {
+    throw new ApiError(
+      403,
+      "Owner cannot leave workspace. Transfer ownership or archive it."
+    );
+  }
+
+  workspace.members = workspace.members.filter(
+    (m) => m.user.toString() !== req.user._id.toString()
+  );
+
+  await workspace.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "You left the workspace"));
+});
+
 export {
   createWorkspace,
   getMyWorkspaces,
   getWorkspaceById,
   updateWorkspace,
   archiveWorkspace,
+  addWorkspaceMember,
+  removeWorkspaceMember,
+  leaveWorkspace
 }
