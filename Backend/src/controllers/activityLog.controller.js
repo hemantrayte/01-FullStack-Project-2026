@@ -23,7 +23,13 @@ const createActivityLog = asyncHandler(async ({
 })
 
 const getAllActivityLogs = asyncHandler(async(req , res) => {
-  
+  const logs = await ActivityLog.find()
+    .populate("user", "name email avatar")
+    .sort({ createdAt: -1 });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, logs, "All activity logs fetched"));
 })
 
 const getWorkspaceLogs = asyncHandler(async(req , res) => {
