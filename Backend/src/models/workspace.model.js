@@ -1,44 +1,51 @@
 import mongoose, { Schema } from "mongoose";
 
-const activityLogSchema = new Schema(
+const workspaceSchema = new Schema(
   {
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-
-    action: {
+    name: {
       type: String,
       required: true,
       trim: true,
     },
 
-    entityType: {
+    description: {
       type: String,
-      enum: ["workspace", "board", "column", "task", "comment"],
-      required: true,
+      trim: true,
     },
 
-    entityId: {
+    owner: {
       type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
 
-    message: {
+    members: [
+      {
+        user: {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        role: {
+          type: String,
+          enum: ["owner", "admin", "member"],
+          default: "member",
+        },
+      },
+    ],
+
+    visibility: {
       type: String,
-      required: true,
+      enum: ["private", "public"],
+      default: "private",
     },
 
-    metadata: {
-      type: Schema.Types.Mixed,
-      default: {},
+    isArchived: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
 );
 
-export const ActivityLog = mongoose.model(
-  "ActivityLog",
-  activityLogSchema
-);
+export const Workspace = mongoose.model("Workspace", workspaceSchema);
