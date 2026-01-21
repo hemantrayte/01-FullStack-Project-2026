@@ -78,7 +78,14 @@ const getTaskLogs = asyncHandler(async(req , res) => {
 })
 
 const getUserLogs = asyncHandler(async(req , res) => {
-  
+  const { userId } = req.params;
+
+  const logs = await ActivityLog.find({ user: userId })
+    .sort({ createdAt: -1 });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, logs, "User activity logs fetched"));
 })
 
 const deleteActivityLog = asyncHandler(async(req , res) => {
