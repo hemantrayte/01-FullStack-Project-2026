@@ -4,8 +4,22 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 
-const createActivityLog = asyncHandler(async(req , res) => {
-
+const createActivityLog = asyncHandler(async ({
+  user,
+  action,
+  entityType,
+  entityId,
+  message,
+  metadata = {},
+}) => {
+  await ActivityLog.create({
+    user,
+    action,
+    entityType,
+    entityId,
+    message,
+    metadata,
+  });
 })
 
 const getAllActivityLogs = asyncHandler(async(req , res) => {
