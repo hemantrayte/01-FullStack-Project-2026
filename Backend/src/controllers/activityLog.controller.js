@@ -103,7 +103,16 @@ const deleteActivityLog = asyncHandler(async(req , res) => {
 })
 
 const clearEntityLogs = asyncHandler(async(req , res) => {
-  
+  const { entityType, entityId } = req.params;
+
+  await ActivityLog.deleteMany({
+    entityType,
+    entityId,
+  });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Activity logs cleared"));
 })
 
 export {
