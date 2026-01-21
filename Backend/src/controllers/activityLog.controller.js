@@ -63,7 +63,18 @@ const getBoardLogs = asyncHandler(async(req , res) => {
 })
 
 const getTaskLogs = asyncHandler(async(req , res) => {
-  
+  const { taskId } = req.params;
+
+  const logs = await ActivityLog.find({
+    entityType: "task",
+    entityId: taskId,
+  })
+    .populate("user", "name email avatar")
+    .sort({ createdAt: -1 });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, logs, "Task logs fetched"));
 })
 
 const getUserLogs = asyncHandler(async(req , res) => {
