@@ -33,7 +33,18 @@ const getAllActivityLogs = asyncHandler(async(req , res) => {
 })
 
 const getWorkspaceLogs = asyncHandler(async(req , res) => {
-  
+  const { workspaceId } = req.params;
+
+  const logs = await ActivityLog.find({
+    entityType: "workspace",
+    entityId: workspaceId,
+  })
+    .populate("user", "name email avatar")
+    .sort({ createdAt: -1 });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, logs, "Workspace logs fetched"));
 })
 
 const getBoardLogs = asyncHandler(async(req , res) => {
