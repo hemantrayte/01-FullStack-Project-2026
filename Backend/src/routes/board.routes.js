@@ -53,14 +53,12 @@ router.delete(
 
 /* ================= BOARD MEMBERS ================= */
 
-// Add member to board
 router.post(
   "/:boardId/members",
   verifyJWT,
   addBoardMember
 );
 
-// Remove member from board
 router.delete(
   "/:boardId/members/:userId",
   verifyJWT,
