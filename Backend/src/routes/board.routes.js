@@ -67,7 +67,6 @@ router.delete(
   removeBoardMember
 );
 
-// Leave board
 router.post(
   "/:boardId/leave",
   verifyJWT,
