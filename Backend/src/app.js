@@ -7,8 +7,12 @@ app.use(cors());
 app.use(express.json());
 
 import userRoutes from "./routes/user.routes.js";
+import boardRoutes from "./routes/board.routes.js";
+
 
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/boards", boardRoutes);
+
 
 
 export default app
