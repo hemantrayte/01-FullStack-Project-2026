@@ -330,7 +330,6 @@ const getAllUsers = asyncHandler(async (req, res) => {
   );
 });
 
-
 const getUserById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
@@ -355,7 +354,6 @@ const getUserById = asyncHandler(async (req, res) => {
       new ApiResponse(200, user, "User fetched successfully")
     );
 });
-
 
 const deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
