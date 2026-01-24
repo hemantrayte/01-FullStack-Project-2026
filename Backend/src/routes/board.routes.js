@@ -51,7 +51,6 @@ router.delete(
   deleteBoard
 );
 
-/* ================= BOARD MEMBERS ================= */
 
 router.post(
   "/:boardId/members",
