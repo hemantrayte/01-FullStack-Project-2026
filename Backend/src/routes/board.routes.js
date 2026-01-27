@@ -51,7 +51,6 @@ router.delete(
   deleteBoard
 );
 
-
 router.post(
   "/:boardId/members",
   verifyJWT,
